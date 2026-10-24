@@ -1,5 +1,6 @@
 // Ziyaretçinin ülkesine göre dil seçer. Hiçbir veri saklanmaz, IP okunmaz: yalnızca Vercel'in verdiği ülke kodu kullanılır.
-const PH='kırık ışığın arşivi';
+const PH={"tr": "kırık ışığın arşivi", "en": "archive of broken light", "de": "Archiv des gebrochenen Lichts", "fr": "archives de la lumière brisée", "es": "archivo de la luz rota", "pt": "arquivo da luz quebrada", "it": "archivio della luce spezzata", "nl": "archief van het gebroken licht", "pl": "archiwum złamanego światła", "ru": "архив сломанного света", "ar": "أرشيف الضوء المكسور", "ja": "壊れた光のアーカイブ", "zh": "破碎之光的档案", "ko": "부서진 빛의 기록"};
+const BASE='https://vesperv8.vercel.app';
 const T={
 tr:['Kayıt 1013. Bu belge bir kez okundu, sonra unutuldu.','Gözün arkasındaki oda','Bakmayı bilmeyen sadece görür.'],
 en:['Record 1013. This document was read once, then forgotten.','The room behind the eye','Those who cannot look only see.'],
@@ -23,9 +24,10 @@ set('ar','SA AE EG IQ JO KW QA OM BH LB SY YE LY DZ MA TN SD PS');set('ja','JP')
 module.exports=(req,res)=>{
   const q=String((req.query&&req.query.lang)||'').toLowerCase();
   const l=T[q]?q:(M[String(req.headers['x-vercel-ip-country']||'').toUpperCase()]||'en');
-  const t=T[l];
+  const t=T[l],p=PH[l],alt=Object.keys(T).map(k=>`<link rel="alternate" hreflang="${k}" href="${BASE}/${k}">`).join('')+`<link rel="alternate" hreflang="x-default" href="${BASE}/en">`;
   res.setHeader('Content-Type','text/html; charset=utf-8');
-  res.setHeader('Cache-Control','private, no-store');
-  res.setHeader('Vary','x-vercel-ip-country');
-  res.status(200).send(`<!doctype html><html lang="${l}" dir="${l==='ar'?'rtl':'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${PH}</title><meta name="description" content="${PH}. ${t[0]}"><style>body{margin:0;background:#0b0b0c;color:#d8d3c4;font:18px/1.8 Georgia,serif;text-align:center;padding:48px 20px}img{max-width:min(520px,100%);margin:28px 0}</style></head><body><h1>${PH}</h1><p>${t[0]}</p><img src="/arsiv.png" alt="${t[1]}"><p>${t[2]}</p><!-- kırmızı kanal, en düşük bit --></body></html>`);
+  const direct=!!(req.query&&req.query.lang);
+  res.setHeader('Cache-Control',direct?'public, s-maxage=3600':'private, no-store');
+  if(!direct)res.setHeader('Vary','x-vercel-ip-country');
+  res.status(200).send(`<!doctype html><html lang="${l}" dir="${l==='ar'?'rtl':'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${p}</title><meta name="description" content="${p}. ${t[0]}"><link rel="canonical" href="${BASE}/${l}">${alt}<style>body{margin:0;background:#0b0b0c;color:#d8d3c4;font:18px/1.8 Georgia,serif;text-align:center;padding:48px 20px}img{max-width:min(520px,100%);margin:28px 0}</style></head><body><h1>${p}</h1><p>${t[0]}</p><img src="/arsiv.png" alt="${t[1]}"><p>${t[2]}</p><!-- kırmızı kanal, en düşük bit --></body></html>`);
 };
