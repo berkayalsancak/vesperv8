@@ -1,1 +1,0 @@
-{"rewrites": [{"source": "/:lang(tr|en|de|fr|es|pt|it|nl|pl|ru|ar|ja|zh|ko)", "destination": "/api/index?lang=:lang"}, {"source": "/", "destination": "/api/index"}]}
